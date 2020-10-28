@@ -13,20 +13,13 @@ val commonsVersion: String by project
 val usersVersion: String by project
 val kotlinVersion: String by project
 val micronautVersion: String by project
-val reactorVersion: String by project
 val kMongoVersion: String by project
-val grpcPgvVersion: String by project
-val grpcServicesVersion: String by project
-val grpcReactorVersion: String by project
-val junitVersion: String by project
-val mockkVersion: String by project
-val assertJVersion: String by project
-val testContainersVersion: String by project
-val basePackage = "com.github.jntakpe.availability"
+val basePackage = "com.github.jntakpe"
 
 plugins {
     idea
     `maven-publish`
+    jacoco
     val kotlinVersion = "1.4.10"
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
@@ -45,6 +38,8 @@ repositories {
     mavenLocal()
     mavenCentral()
     jcenter()
+    mavenGithub("equidis/commons")
+    mavenGithub("equidis/micronaut-grpc-users-service")
 }
 
 micronaut {
@@ -62,35 +57,13 @@ dependencies {
     kapt(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     kapt("io.micronaut:micronaut-inject-java")
     kapt("org.litote.kmongo:kmongo-annotation-processor:$kMongoVersion")
-    implementation(platform("io.micronaut:micronaut-bom:$micronautVersion"))
-    implementation(platform("io.projectreactor:reactor-bom:$reactorVersion"))
-    implementation("com.github.jntakpe:commons:$commonsVersion")
-    implementation("com.github.jntakpe:users:$usersVersion")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
-    implementation("javax.annotation:javax.annotation-api")
-    implementation("io.micronaut:micronaut-inject")
-    implementation("io.micronaut.kotlin:micronaut-kotlin-runtime")
-    implementation("io.micronaut.grpc:micronaut-grpc-runtime")
-    implementation("io.micronaut.mongodb:micronaut-mongo-reactive")
-    implementation("io.micronaut.reactor:micronaut-reactor")
-    implementation("io.envoyproxy.protoc-gen-validate:pgv-java-grpc:$grpcPgvVersion")
-    implementation("io.grpc:grpc-services:$grpcServicesVersion")
-    implementation("com.salesforce.servicelibs:reactor-grpc-stub:$grpcReactorVersion")
-    implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
-    implementation("org.litote.kmongo:kmongo-async-serialization:$kMongoVersion")
+    implementation("com.github.jntakpe:commons-grpc:$commonsVersion")
+    implementation("com.github.jntakpe:commons-micronaut:$commonsVersion")
+    implementation("com.github.jntakpe:commons-mongo:$commonsVersion")
     runtimeOnly("ch.qos.logback:logback-classic")
     kaptTest(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     kaptTest("io.micronaut:micronaut-inject-java")
-    testImplementation(platform("org.junit:junit-bom:$junitVersion"))
-    testImplementation("org.junit.jupiter:junit-jupiter-params")
-    testImplementation("io.micronaut.test:micronaut-test-junit5")
-    testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation("io.projectreactor:reactor-test:")
-    testImplementation("org.assertj:assertj-core:$assertJVersion")
-    testImplementation("org.testcontainers:testcontainers:$testContainersVersion")
-    testImplementation("org.testcontainers:junit-jupiter:$testContainersVersion")
-    testImplementation("org.testcontainers:mongodb:$testContainersVersion")
+    testImplementation("com.github.jntakpe:commons-mongo-test:$commonsVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
 
@@ -112,6 +85,7 @@ sourceSets {
 }
 
 protobuf {
+    val grpcId = "grpc"
     val javaPgvId = "javapgv"
     val reactorId = "reactor"
     val krotoId = "kroto"
@@ -119,6 +93,9 @@ protobuf {
         artifact = "com.google.protobuf:protoc:3.13.0"
     }
     plugins {
+        id(grpcId) {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.32.1"
+        }
         id(javaPgvId) {
             artifact = "io.envoyproxy.protoc-gen-validate:protoc-gen-validate:0.4.1"
         }
@@ -129,6 +106,9 @@ protobuf {
             artifact = "com.github.marcoferrer.krotoplus:protoc-gen-kroto-plus:0.6.1"
         }
     }
+    dependencies {
+        protobuf("com.github.jntakpe:users:$usersVersion")
+    }
     generateProtoTasks {
         val krotoConfig = file("kroto-config.yaml")
         all().forEach {
@@ -136,6 +116,7 @@ protobuf {
             it.descriptorSetOptions.includeImports = true
             it.inputs.files(krotoConfig)
             it.plugins {
+                id(grpcId)
                 id(javaPgvId) {
                     option("lang=java")
                 }
@@ -162,6 +143,20 @@ tasks {
             javaParameters = true
         }
     }
+    jacocoTestReport {
+        dependsOn(test)
+        reports {
+            xml.isEnabled = true
+        }
+        classDirectories.setFrom(
+            sourceSets.main.get().output.asFileTree.matching {
+                exclude("build/generated")
+            }
+        )
+    }
+    check {
+        dependsOn(jacocoTestReport)
+    }
 }
 val protoJar = tasks.register<Jar>("protoJar") {
     dependsOn(tasks.jar)
@@ -178,5 +173,19 @@ publishing {
         create<MavenPublication>("mavenProto") {
             artifact(tasks.getByName(protoJar.name))
         }
+    }
+    repositories {
+        mavenGithub("equidis/micronaut-grpc-availability-service")
+    }
+}
+
+fun RepositoryHandler.mavenGithub(repository: String) = maven {
+    name = "Github_packages"
+    setUrl("https://maven.pkg.github.com/$repository")
+    credentials {
+        val githubActor: String by project
+        val githubToken: String by project
+        username = githubActor
+        password = githubToken
     }
 }
