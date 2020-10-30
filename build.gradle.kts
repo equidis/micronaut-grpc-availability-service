@@ -63,6 +63,7 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     kaptTest(platform("io.micronaut:micronaut-bom:$micronautVersion"))
     kaptTest("io.micronaut:micronaut-inject-java")
+    testImplementation("com.github.jntakpe:commons-grpc-test:$commonsVersion")
     testImplementation("com.github.jntakpe:commons-mongo-test:$commonsVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine")
 }
@@ -107,7 +108,7 @@ protobuf {
         }
     }
     dependencies {
-        protobuf("com.github.jntakpe:users:$usersVersion")
+        protobuf("com.github.jntakpe:users:$usersVersion:proto")
     }
     generateProtoTasks {
         val krotoConfig = file("kroto-config.yaml")
