@@ -1,0 +1,46 @@
+package com.github.jntakpe.availability.service
+
+import com.github.jntakpe.availability.dao.UserAvailabilityDao
+import com.github.jntakpe.availability.model.entity.UserAvailability
+import com.github.jntakpe.commons.test.expectStatusException
+import io.grpc.Status
+import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import org.assertj.core.api.Assertions.assertThat
+import org.bson.types.ObjectId
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ArgumentsSource
+import reactor.kotlin.test.test
+
+@MicronautTest
+internal class UserAvailabilityServiceTest(private val service: UserAvailabilityService, private val dao: UserAvailabilityDao) {
+
+    @BeforeEach
+    fun setup() {
+        dao.init()
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(UserAvailabilityDao.TransientData::class)
+    fun `create should return created document`(userAvailability: UserAvailability) {
+        service.create(userAvailability).test()
+            .consumeNextWith { assertThat(it).usingRecursiveComparison().ignoringFields("id").isEqualTo(userAvailability) }
+            .verifyComplete()
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(UserAvailabilityDao.PersistedData::class)
+    fun `create should fail with already exists code when integrity constraint violated`(userAvailability: UserAvailability) {
+        service.create(UserAvailabilityDao.TransientData.mdoeRemote.copy(userId = userAvailability.userId)).test()
+            .expectStatusException(Status.ALREADY_EXISTS)
+            .verify()
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(UserAvailabilityDao.TransientData::class)
+    fun `create should fail when user id does not exists`(userAvailability: UserAvailability) {
+        service.create(userAvailability.copy(userId = ObjectId().toString())).test()
+            .expectStatusException(Status.INVALID_ARGUMENT)
+            .verify()
+    }
+}
