@@ -15,12 +15,12 @@ class UserAvailabilityService(private val repository: UserAvailabilityRepository
 
     private val log = logger()
 
-    fun create(userAvailability: UserAvailability): Mono<UserAvailability> {
+    fun declareAvailability(userAvailability: UserAvailability): Mono<UserAvailability> {
         return verifyUserIdExists(userAvailability.userId)
-            .then(createVerified(userAvailability))
+            .then(declareVerifiedUserAvailability(userAvailability))
     }
 
-    private fun createVerified(userAvailability: UserAvailability): Mono<UserAvailability> {
+    private fun declareVerifiedUserAvailability(userAvailability: UserAvailability): Mono<UserAvailability> {
         return repository.create(userAvailability)
             .doOnSubscribe { log.debug("Creating {}", userAvailability) }
             .doOnNext { log.info("{} created", it) }

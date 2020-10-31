@@ -22,24 +22,24 @@ internal class UserAvailabilityServiceTest(private val service: UserAvailability
 
     @ParameterizedTest
     @ArgumentsSource(UserAvailabilityDao.TransientData::class)
-    fun `create should return created document`(userAvailability: UserAvailability) {
-        service.create(userAvailability).test()
+    fun `declare availability should return created document`(userAvailability: UserAvailability) {
+        service.declareAvailability(userAvailability).test()
             .consumeNextWith { assertThat(it).usingRecursiveComparison().ignoringFields("id").isEqualTo(userAvailability) }
             .verifyComplete()
     }
 
     @ParameterizedTest
     @ArgumentsSource(UserAvailabilityDao.PersistedData::class)
-    fun `create should fail with already exists code when integrity constraint violated`(userAvailability: UserAvailability) {
-        service.create(UserAvailabilityDao.TransientData.mdoeRemote.copy(userId = userAvailability.userId)).test()
+    fun `declare availability should fail with already exists code when integrity constraint violated`(userAvailability: UserAvailability) {
+        service.declareAvailability(UserAvailabilityDao.TransientData.mdoeRemote.copy(userId = userAvailability.userId)).test()
             .expectStatusException(Status.ALREADY_EXISTS)
             .verify()
     }
 
     @ParameterizedTest
     @ArgumentsSource(UserAvailabilityDao.TransientData::class)
-    fun `create should fail when user id does not exists`(userAvailability: UserAvailability) {
-        service.create(userAvailability.copy(userId = ObjectId().toString())).test()
+    fun `declare availability should fail when user id does not exists`(userAvailability: UserAvailability) {
+        service.declareAvailability(userAvailability.copy(userId = ObjectId().toString())).test()
             .expectStatusException(Status.INVALID_ARGUMENT)
             .verify()
     }
