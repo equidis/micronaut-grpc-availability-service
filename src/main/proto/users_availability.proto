@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+option java_package = "com.github.jntakpe.availability.proto";
+
+package availability;
+
+import "validate/validate.proto";
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+
+service UsersAvailabilityService {
+  rpc DeclareAvailability(DeclareAvailabilityRequest) returns (UsersAvailabilityResponse);
+}
+
+message DeclareAvailabilityRequest {
+  string userId = 1 [(validate.rules).string.len = 24];
+  string day = 2;
+  WorkArrangement arrangement = 3 [(validate.rules).enum.defined_only = true];
+}
+
+message UsersAvailabilityResponse {
+  string userId = 1 [(validate.rules).string.len = 24];
+  string day = 2 [(validate.rules).string.pattern = "^\\d{4}-([0]\\d|1[0-2])-([0-2]\\d|3[01])$"];
+  WorkArrangement arrangement = 3 [(validate.rules).enum.defined_only = true];
+  string id = 15 [(validate.rules).string.len = 24];
+}
+
+enum WorkArrangement {
+  ONSITE = 0;
+  REMOTE = 1;
+  OFF = 2;
+}
