@@ -1,4 +1,4 @@
-package com.github.jntakpe.availability.mappings
+package com.github.jntakpe.availability.mapping
 
 import com.github.jntakpe.availability.model.entity.UserAvailability
 import com.github.jntakpe.availability.model.entity.WorkArrangementType

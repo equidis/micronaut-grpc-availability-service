@@ -1,4 +1,4 @@
-package com.github.jntakpe.availability.mappings
+package com.github.jntakpe.availability.mapping
 
 import com.github.jntakpe.availability.dao.UserAvailabilityDao.PersistedData.JDOE_ID
 import com.github.jntakpe.availability.dao.UserAvailabilityDao.PersistedData.jdoeOnsite
