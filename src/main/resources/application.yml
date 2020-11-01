@@ -6,8 +6,8 @@ mongodb:
   automatic-class-models: false
 grpc:
   server:
-    port: 8082
+    port: 8081
   channels:
     users:
-      address: ${USERS_HOST:localhost}:${USERS_PORT:8081}
+      address: ${USERS_HOST:localhost}:${USERS_PORT:8080}
       plaintext: true
