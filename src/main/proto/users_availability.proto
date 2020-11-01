@@ -15,7 +15,7 @@ service UsersAvailabilityService {
 
 message DeclareAvailabilityRequest {
   string userId = 1 [(validate.rules).string.len = 24];
-  string day = 2;
+  string day = 2 [(validate.rules).string.pattern = "^\\d{4}-([0]\\d|1[0-2])-([0-2]\\d|3[01])$"];
   WorkArrangement arrangement = 3 [(validate.rules).enum.defined_only = true];
 }
 
