@@ -1,6 +1,7 @@
 package com.github.jntakpe.availability.service
 
 import com.github.jntakpe.availability.dao.UserAvailabilityDao
+import com.github.jntakpe.availability.dao.UserAvailabilityDao.PersistedData.JDOE_ID
 import com.github.jntakpe.availability.model.entity.UserAvailability
 import com.github.jntakpe.commons.test.expectStatusException
 import io.grpc.Status
@@ -34,6 +35,24 @@ internal class UserAvailabilityServiceTest(private val service: UserAvailability
         service.findById(userAvailability.id).test()
             .expectStatusException(Status.NOT_FOUND)
             .verify()
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(UserAvailabilityDao.PersistedData::class)
+    fun `find by user id should return multiple availabilities`(userAvailability: UserAvailability) {
+        service.findByUserId(userAvailability.userId).test()
+            .recordWith { ArrayList() }
+            .expectNextCount(UserAvailabilityDao.PersistedData.data().size.toLong())
+            .consumeRecordedWith { l -> assertThat(l.map { it.userId }).containsOnly(JDOE_ID) }
+            .verifyComplete()
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(UserAvailabilityDao.TransientData::class)
+    fun `find by user id return empty when user id does not exists`(userAvailability: UserAvailability) {
+        service.findByUserId(userAvailability.userId).test()
+            .expectNextCount(0)
+            .verifyComplete()
     }
 
     @ParameterizedTest

@@ -20,7 +20,6 @@ internal class UserClientTest(private val client: UserClient) {
     @ArgumentsSource(UserAvailabilityDao.PersistedData::class)
     fun `find user by id should find`(availability: UserAvailability) {
         client.findById(availability.userId).test()
-            .expectSubscription()
             .consumeNextWith { assertThat(it.id).isEqualTo(availability.userId) }
             .verifyComplete()
     }
@@ -29,7 +28,6 @@ internal class UserClientTest(private val client: UserClient) {
     @ValueSource(strings = ["unknown", "", "*"])
     fun `find user by id should fail when id does not exists`(userId: String) {
         client.findById(userId).test()
-            .expectSubscription()
             .expectStatusException(Status.NOT_FOUND)
             .verify()
     }
@@ -38,7 +36,6 @@ internal class UserClientTest(private val client: UserClient) {
     @ValueSource(strings = [JDOE_USERNAME, MDOE_USERNAME])
     fun `find user by username should find`(username: String) {
         client.findByUsername(username).test()
-            .expectSubscription()
             .consumeNextWith { assertThat(it.username).isEqualTo(username) }
             .verifyComplete()
     }
@@ -47,7 +44,6 @@ internal class UserClientTest(private val client: UserClient) {
     @ValueSource(strings = ["unknown", "", "*"])
     fun `find user by username should fail when id does not exists`(username: String) {
         client.findByUsername(username).test()
-            .expectSubscription()
             .expectStatusException(Status.NOT_FOUND)
             .verify()
     }
