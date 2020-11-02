@@ -31,6 +31,13 @@ class UserAvailabilityService(private val repository: UserAvailabilityRepository
             .doOnComplete { log.debug("Availabilities retrieved using user id {}", userId) }
     }
 
+    fun findByUsername(username: String): Flux<UserAvailability> {
+        return client.findByUsername(username)
+            .doOnSubscribe { log.debug("Searching user availability identifier using it's username {}", username) }
+            .doOnNext { log.debug("{} retrieved using it's username", it) }
+            .flatMapMany { findByUserId(it.id) }
+    }
+
     fun declareAvailability(userAvailability: UserAvailability): Mono<UserAvailability> {
         return verifyUserIdExists(userAvailability.userId)
             .then(declareVerifiedUserAvailability(userAvailability))

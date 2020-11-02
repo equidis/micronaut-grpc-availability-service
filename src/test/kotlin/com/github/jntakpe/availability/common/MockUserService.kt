@@ -48,7 +48,7 @@ class MockUserService : Supplier<BindableService> {
 
         private fun mdoeResponse(): Users.UserResponse {
             return UserResponse {
-                id = JDOE_ID
+                id = MDOE_ID
                 username = MDOE_USERNAME
                 email = "mmoe@mail.com"
             }

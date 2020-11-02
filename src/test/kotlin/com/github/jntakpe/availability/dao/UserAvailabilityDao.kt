@@ -28,9 +28,9 @@ class UserAvailabilityDao(database: MongoDatabase) : MongoDao<UserAvailability>(
     object TransientData : TestDataProvider<UserAvailability> {
 
         val MDOE_ID = ObjectId().toString()
-        val mdoeOnsite = UserAvailability(MDOE_ID, LocalDate.of(2020, 10, 15), OFF, ObjectId())
-        val mdoeRemote = UserAvailability(MDOE_ID, LocalDate.of(2020, 10, 16), ONSITE, ObjectId())
-        val mdoeOff = UserAvailability(MDOE_ID, LocalDate.of(2020, 10, 19), REMOTE, ObjectId())
+        val mdoeOnsite = UserAvailability(MDOE_ID, LocalDate.of(2020, 10, 15), ONSITE, ObjectId())
+        val mdoeRemote = UserAvailability(MDOE_ID, LocalDate.of(2020, 10, 16), REMOTE, ObjectId())
+        val mdoeOff = UserAvailability(MDOE_ID, LocalDate.of(2020, 10, 19), OFF, ObjectId())
 
         override fun data() = listOf(mdoeOnsite, mdoeRemote, mdoeOff)
     }

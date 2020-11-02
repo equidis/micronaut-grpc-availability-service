@@ -1,5 +1,7 @@
 package com.github.jntakpe.availability.service
 
+import com.github.jntakpe.availability.common.MockUserService.Companion.JDOE_USERNAME
+import com.github.jntakpe.availability.common.MockUserService.Companion.MDOE_USERNAME
 import com.github.jntakpe.availability.dao.UserAvailabilityDao
 import com.github.jntakpe.availability.dao.UserAvailabilityDao.PersistedData.JDOE_ID
 import com.github.jntakpe.availability.model.entity.UserAvailability
@@ -9,8 +11,10 @@ import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.assertj.core.api.Assertions.assertThat
 import org.bson.types.ObjectId
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ArgumentsSource
+import org.junit.jupiter.params.provider.ValueSource
 import reactor.kotlin.test.test
 
 @MicronautTest
@@ -53,6 +57,30 @@ internal class UserAvailabilityServiceTest(private val service: UserAvailability
         service.findByUserId(userAvailability.userId).test()
             .expectNextCount(0)
             .verifyComplete()
+    }
+
+    @Test
+    fun `find by user username should return multiple availabilities`() {
+        service.findByUsername(JDOE_USERNAME).test()
+            .recordWith { ArrayList() }
+            .expectNextCount(UserAvailabilityDao.PersistedData.data().size.toLong())
+            .consumeRecordedWith { l -> assertThat(l.map { it.userId }).containsOnly(JDOE_ID) }
+            .verifyComplete()
+    }
+
+    @Test
+    fun `find by username return empty when username does not exists in database`() {
+        service.findByUsername(MDOE_USERNAME).test()
+            .expectNextCount(0)
+            .verifyComplete()
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = ["unknown", "", "*"])
+    fun `find by username return empty when username does not exists in client service`(username: String) {
+        service.findByUsername(username).test()
+            .expectStatusException(Status.NOT_FOUND)
+            .verify()
     }
 
     @ParameterizedTest
