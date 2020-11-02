@@ -7,13 +7,22 @@ import com.github.jntakpe.commons.context.CommonException
 import com.github.jntakpe.commons.context.logger
 import com.github.jntakpe.commons.mongo.insertError
 import io.grpc.Status
+import org.bson.types.ObjectId
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toMono
 import javax.inject.Singleton
 
 @Singleton
 class UserAvailabilityService(private val repository: UserAvailabilityRepository, private val client: UserClient) {
 
     private val log = logger()
+
+    fun findById(id: ObjectId): Mono<UserAvailability> {
+        return repository.findById(id)
+            .doOnSubscribe { log.debug("Searching user availability by id {}", id) }
+            .doOnNext { log.debug("{} retrieved using it's id", it) }
+            .switchIfEmpty(missingIdError(id).toMono())
+    }
 
     fun declareAvailability(userAvailability: UserAvailability): Mono<UserAvailability> {
         return verifyUserIdExists(userAvailability.userId)
@@ -33,5 +42,9 @@ class UserAvailabilityService(private val repository: UserAvailabilityRepository
             .doOnNext { log.debug("User id {} is valid", id) }
             .onErrorMap { CommonException("User id $id does not exists", log::debug, Status.Code.INVALID_ARGUMENT, it) }
             .then()
+    }
+
+    private fun missingIdError(id: ObjectId): CommonException {
+        return CommonException("No user availability found for id $id", log::debug, Status.Code.NOT_FOUND)
     }
 }

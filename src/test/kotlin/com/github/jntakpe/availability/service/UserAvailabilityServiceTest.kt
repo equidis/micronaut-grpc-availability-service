@@ -21,6 +21,22 @@ internal class UserAvailabilityServiceTest(private val service: UserAvailability
     }
 
     @ParameterizedTest
+    @ArgumentsSource(UserAvailabilityDao.PersistedData::class)
+    fun `find by id should return user availability`(userAvailability: UserAvailability) {
+        service.findById(userAvailability.id).test()
+            .expectNext(userAvailability)
+            .verifyComplete()
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(UserAvailabilityDao.TransientData::class)
+    fun `find by id fail when user availability does not exists`(userAvailability: UserAvailability) {
+        service.findById(userAvailability.id).test()
+            .expectStatusException(Status.NOT_FOUND)
+            .verify()
+    }
+
+    @ParameterizedTest
     @ArgumentsSource(UserAvailabilityDao.TransientData::class)
     fun `declare availability should return created document`(userAvailability: UserAvailability) {
         service.declareAvailability(userAvailability).test()
