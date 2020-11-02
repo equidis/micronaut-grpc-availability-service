@@ -8,6 +8,7 @@ import com.github.jntakpe.commons.context.logger
 import com.github.jntakpe.commons.mongo.insertError
 import io.grpc.Status
 import org.bson.types.ObjectId
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.kotlin.core.publisher.toMono
 import javax.inject.Singleton
@@ -22,6 +23,12 @@ class UserAvailabilityService(private val repository: UserAvailabilityRepository
             .doOnSubscribe { log.debug("Searching user availability by id {}", id) }
             .doOnNext { log.debug("{} retrieved using it's id", it) }
             .switchIfEmpty(missingIdError(id).toMono())
+    }
+
+    fun findByUserId(userId: String): Flux<UserAvailability> {
+        return repository.findByUserId(userId)
+            .doOnSubscribe { log.debug("Searching user availability by user id {}", userId) }
+            .doOnComplete { log.debug("Availabilities retrieved using user id {}", userId) }
     }
 
     fun declareAvailability(userAvailability: UserAvailability): Mono<UserAvailability> {
