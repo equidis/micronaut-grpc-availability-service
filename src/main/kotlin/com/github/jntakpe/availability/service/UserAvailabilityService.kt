@@ -7,6 +7,7 @@ import com.github.jntakpe.commons.context.CommonException
 import com.github.jntakpe.commons.context.logger
 import com.github.jntakpe.commons.mongo.insertError
 import io.grpc.Status
+import io.grpc.StatusRuntimeException
 import org.bson.types.ObjectId
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -33,6 +34,7 @@ class UserAvailabilityService(private val repository: UserAvailabilityRepository
 
     fun findByUsername(username: String): Flux<UserAvailability> {
         return client.findByUsername(username)
+            .onErrorResume({ it.isNotFoundError() }) { Mono.empty() }
             .doOnSubscribe { log.debug("Searching user availability identifier using it's username {}", username) }
             .doOnNext { log.debug("{} retrieved using it's username", it) }
             .flatMapMany { findByUserId(it.id) }
@@ -61,4 +63,6 @@ class UserAvailabilityService(private val repository: UserAvailabilityRepository
     private fun missingIdError(id: ObjectId): CommonException {
         return CommonException("No user availability found for id $id", log::debug, Status.Code.NOT_FOUND)
     }
+
+    private fun Throwable.isNotFoundError() = (this as? StatusRuntimeException)?.status == Status.NOT_FOUND
 }

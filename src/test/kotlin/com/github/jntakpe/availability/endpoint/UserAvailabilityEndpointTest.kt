@@ -1,13 +1,19 @@
 package com.github.jntakpe.availability.endpoint
 
+import com.github.jntakpe.availability.common.MockUserService.Companion.JDOE_USERNAME
+import com.github.jntakpe.availability.common.MockUserService.Companion.MDOE_USERNAME
 import com.github.jntakpe.availability.dao.UserAvailabilityDao
+import com.github.jntakpe.availability.dao.UserAvailabilityDao.PersistedData.JDOE_ID
 import com.github.jntakpe.availability.dao.UserAvailabilityDao.TransientData.MDOE_ID
 import com.github.jntakpe.availability.model.entity.UserAvailability
+import com.github.jntakpe.availability.proto.ByIdRequest
 import com.github.jntakpe.availability.proto.DeclareAvailabilityRequest
+import com.github.jntakpe.availability.proto.UserIdentification
 import com.github.jntakpe.availability.proto.UsersAvailability
 import com.github.jntakpe.availability.proto.UsersAvailabilityServiceGrpc.UsersAvailabilityServiceBlockingStub
 import com.github.jntakpe.commons.test.assertStatusException
 import io.grpc.Status
+import io.grpc.StatusRuntimeException
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -22,6 +28,58 @@ internal class UserAvailabilityEndpointTest(private val dao: UserAvailabilityDao
     @BeforeEach
     fun setup() {
         dao.init()
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(UserAvailabilityDao.PersistedData::class)
+    fun `find by id should return ok response`(userAvailability: UserAvailability) {
+        val request = ByIdRequest { id = userAvailability.id.toString() }
+        val response = stub.findById(request)
+        assertThat(response.id).isNotEmpty.isEqualTo(userAvailability.id.toString())
+    }
+
+    @ParameterizedTest
+    @ArgumentsSource(UserAvailabilityDao.TransientData::class)
+    fun `find by id should fail when user does not exist`(userAvailability: UserAvailability) {
+        val request = ByIdRequest { id = userAvailability.id.toString() }
+        val error = catchThrowable { stub.findById(request) }
+        assertThat(error).isInstanceOf(StatusRuntimeException::class.java)
+        error as StatusRuntimeException
+        assertThat(error.status.code).isEqualTo(Status.NOT_FOUND.code)
+    }
+
+    @Test
+    fun `find by user should return ok response using user id`() {
+        val request = UserIdentification { userId = JDOE_ID }
+        val response = stub.findByUser(request)
+        assertThat(response.usersAvailabilitiesList.map { it.userId }).isNotEmpty.containsOnly(JDOE_ID)
+    }
+
+    @Test
+    fun `find by user should return empty when user id does not exist`() {
+        val request = UserIdentification { userId = MDOE_ID }
+        val response = stub.findByUser(request)
+        assertThat(response.usersAvailabilitiesList.map { it.userId }).isEmpty()
+    }
+
+    @Test
+    fun `find by user should return ok response using username`() {
+        val request = UserIdentification { username = JDOE_USERNAME }
+        val response = stub.findByUser(request)
+        assertThat(response.usersAvailabilitiesList.map { it.userId }).isNotEmpty.containsOnly(JDOE_ID)
+    }
+
+    @Test
+    fun `find by user should return empty when username does not exist`() {
+        val request = UserIdentification { username = MDOE_USERNAME }
+        val response = stub.findByUser(request)
+        assertThat(response.usersAvailabilitiesList.map { it.userId }).isEmpty()
+    }
+
+    @Test
+    fun `find by user should not set both user id and username`() {
+        val request = UserIdentification { username = JDOE_USERNAME; userId = JDOE_ID }
+        assertThat(request.username.isNotEmpty() && request.userId.isNotEmpty()).isFalse
     }
 
     @ParameterizedTest
