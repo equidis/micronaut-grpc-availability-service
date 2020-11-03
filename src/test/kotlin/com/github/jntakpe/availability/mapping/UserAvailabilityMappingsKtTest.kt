@@ -2,6 +2,7 @@ package com.github.jntakpe.availability.mapping
 
 import com.github.jntakpe.availability.dao.UserAvailabilityDao.PersistedData.JDOE_ID
 import com.github.jntakpe.availability.dao.UserAvailabilityDao.PersistedData.jdoeOnsite
+import com.github.jntakpe.availability.dao.UserAvailabilityDao.PersistedData.jdoeRemote
 import com.github.jntakpe.availability.dao.UserAvailabilityDao.TransientData.MDOE_ID
 import com.github.jntakpe.availability.model.entity.UserAvailability
 import com.github.jntakpe.availability.model.entity.WorkArrangementType
@@ -42,5 +43,21 @@ internal class UserAvailabilityMappingsKtTest {
         val response = jdoeOnsite.toResponse()
         assertThat(response).usingRecursiveComparison().ignoringFields(UserAvailability::arrangement.name).isEqualTo(expected)
         assertThat(response.arrangement.name).isEqualTo(expected.arrangement.name)
+    }
+
+    @Test
+    fun `to response should map entity list`() {
+        val entities = listOf(jdoeOnsite, jdoeRemote)
+        val responses = entities.toResponse()
+        assertThat(responses.usersAvailabilitiesCount).isEqualTo(entities.size)
+        assertThat(responses.usersAvailabilitiesList).usingRecursiveComparison().isEqualTo(entities.map { it.toResponse() })
+    }
+
+    @Test
+    fun `to response should map empty entity list`() {
+        val entities = emptyList<UserAvailability>()
+        val responses = entities.toResponse()
+        assertThat(responses.usersAvailabilitiesCount).isZero
+        assertThat(responses.usersAvailabilitiesList).isEmpty()
     }
 }
