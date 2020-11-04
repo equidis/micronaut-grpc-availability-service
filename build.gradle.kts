@@ -133,7 +133,7 @@ protobuf {
 
 jib {
     to {
-        image = "gcr.io/demo/jib-image"
+        image = "eu.gcr.io/equidis/micronaut-availability"
     }
 }
 
