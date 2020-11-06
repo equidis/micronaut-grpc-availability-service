@@ -12,10 +12,8 @@ import javax.inject.Singleton
 class GrpcValidatorConfig {
 
     @Singleton
-    fun grpcValidators(): Iterable<GrpcValidator<*>> {
-        return listOf(
-            GrpcValidator(DeclareAvailabilityRequest::class, DeclareAvailabilityRequestValidator()),
-            GrpcValidator(UsersAvailabilityResponse::class, UsersAvailabilityResponseValidator()),
-        )
-    }
+    fun declareAvailabilityRequestValidator() = GrpcValidator(DeclareAvailabilityRequest::class, DeclareAvailabilityRequestValidator())
+
+    @Singleton
+    fun usersAvailabilityResponseValidator() = GrpcValidator(UsersAvailabilityResponse::class, UsersAvailabilityResponseValidator())
 }
