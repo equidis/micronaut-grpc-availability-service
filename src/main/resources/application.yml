@@ -11,5 +11,5 @@ grpc:
     port: ${SERVER_PORT:8081}
   channels:
     users:
-      address: ${USERS_HOST:localhost}:${USERS_PORT:8080}
+      address: ${USERS_SERVICE_HOST:`users:80`}
       plaintext: true
