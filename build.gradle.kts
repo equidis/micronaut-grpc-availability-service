@@ -152,7 +152,7 @@ tasks {
         }
         classDirectories.setFrom(
             sourceSets.main.get().output.asFileTree.matching {
-                exclude("build/generated")
+                exclude("build/generated", "**/model/entity/**")
             }
         )
     }
