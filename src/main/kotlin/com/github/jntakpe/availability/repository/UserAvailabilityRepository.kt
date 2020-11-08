@@ -10,11 +10,10 @@ import com.mongodb.reactor.client.toReactor
 import org.bson.types.ObjectId
 import org.litote.kmongo.ascending
 import org.litote.kmongo.eq
-import org.litote.kmongo.reactivestreams.findOneById
 import org.litote.kmongo.reactivestreams.getCollection
+import org.litote.kmongo.reactor.findOneById
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import reactor.kotlin.core.publisher.toMono
 import javax.inject.Singleton
 
 @Singleton
@@ -23,10 +22,10 @@ class UserAvailabilityRepository(database: MongoDatabase) {
     private val collection = database.getCollection<UserAvailability>().toReactor()
 
     init {
-        collection.createIndex(Indexes.compoundIndex(ascending(UserId, Day)), IndexOptions().unique(true)).toMono().subscribe()
+        collection.createIndex(Indexes.compoundIndex(ascending(UserId, Day)), IndexOptions().unique(true)).subscribe()
     }
 
-    fun findById(id: ObjectId): Mono<UserAvailability> = collection.findOneById(id).toMono()
+    fun findById(id: ObjectId): Mono<UserAvailability> = collection.findOneById(id)
 
     fun findByUserId(userId: String): Flux<UserAvailability> = collection.find(UserId eq userId)
 
