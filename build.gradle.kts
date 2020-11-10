@@ -15,6 +15,7 @@ val kotlinVersion: String by project
 val micronautVersion: String by project
 val kMongoVersion: String by project
 val basePackage = "com.github.jntakpe"
+val protoDescriptorPath = "${buildDir}/generated/proto.pb"
 
 plugins {
     idea
@@ -116,7 +117,7 @@ protobuf {
         all().forEach {
             it.generateDescriptorSet = true
             it.descriptorSetOptions.includeImports = true
-            it.descriptorSetOptions.path = "${buildDir}/libs/proto.pb"
+            it.descriptorSetOptions.path = protoDescriptorPath
             it.inputs.files(krotoConfig)
             it.plugins {
                 id(grpcId)
@@ -163,7 +164,7 @@ tasks {
 }
 val protoJar = tasks.register<Jar>("protoJar") {
     dependsOn(tasks.jar)
-    from("src/main/proto")
+    from("src/main/proto", protoDescriptorPath)
     archiveClassifier.set("proto")
 }
 val shadowJar = tasks.named<ShadowJar>("shadowJar") {
