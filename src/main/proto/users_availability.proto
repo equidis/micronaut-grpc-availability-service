@@ -10,9 +10,15 @@ import "google/protobuf/timestamp.proto";
 
 
 service UsersAvailabilityService {
-  rpc FindById(ByIdRequest) returns (UsersAvailabilityResponse);
-  rpc FindByUser(UserIdentification) returns (UsersAvailabilitiesResponse);
-  rpc DeclareAvailability(DeclareAvailabilityRequest) returns (UsersAvailabilityResponse);
+  rpc FindById(ByIdRequest) returns (UsersAvailabilityResponse) {
+    option (google.api.http) = {get: "/user-availabilities/{id}"};
+  }
+  rpc FindByUser(UserIdentification) returns (UsersAvailabilitiesResponse) {
+    option (google.api.http) = {get: "/user-availabilities"};
+  }
+  rpc DeclareAvailability(DeclareAvailabilityRequest) returns (UsersAvailabilityResponse) {
+    option (google.api.http) = {post: "/user-availabilities"};
+  }
 }
 
 message ByIdRequest {
