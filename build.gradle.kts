@@ -8,6 +8,9 @@ import io.micronaut.gradle.MicronautRuntime.NONE
 import io.micronaut.gradle.MicronautTestRuntime.JUNIT_5
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.util.prefixIfNot
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
 
 val commonsVersion: String by project
 val usersVersion: String by project
@@ -16,6 +19,7 @@ val micronautVersion: String by project
 val kMongoVersion: String by project
 val basePackage = "com.github.jntakpe"
 val protoDescriptorPath = "${buildDir}/generated/proto.pb"
+val grpcServices = listOf("availability.UsersAvailabilityService")
 
 plugins {
     idea
@@ -160,6 +164,30 @@ tasks {
     }
     check {
         dependsOn(jacocoTestReport)
+    }
+    val deploymentZip = register<Zip>("deploymentZip") {
+        val path = Paths.get("$buildDir/generated/build-metadata.yaml")
+        doFirst {
+            if (!Files.exists(path)) Files.createFile(path)
+            Files.writeString(
+                path,
+                """
+        app:
+          name: ${project.name}
+          version: ${project.version}
+        image:
+          name: micronaut-${project.name}
+        api:
+          services: ${grpcServices.joinToString(prefix = "[", postfix = "]")}
+    """.trimIndent(), StandardOpenOption.SYNC
+            )
+        }
+        archiveFileName.set("deployment-metadata.zip")
+        destinationDirectory.set(Paths.get(buildDir.toString(), "distributions").toFile())
+        from(path.toString(), protoDescriptorPath)
+    }
+    assemble {
+        dependsOn(deploymentZip)
     }
 }
 val protoJar = tasks.register<Jar>("protoJar") {
