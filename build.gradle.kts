@@ -75,7 +75,7 @@ dependencies {
 }
 
 application {
-    mainClass.set("$basePackage.ApplicationKt")
+    mainClass.set("$basePackage.availability.ApplicationKt")
 }
 
 java {
