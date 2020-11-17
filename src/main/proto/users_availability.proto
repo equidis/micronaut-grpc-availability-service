@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option java_package = "com.github.jntakpe.availability.proto";
 
-package availability;
+package availabilities;
 
 import "validate/validate.proto";
 import "google/api/annotations.proto";
@@ -11,13 +11,13 @@ import "google/protobuf/timestamp.proto";
 
 service UsersAvailabilityService {
   rpc FindById(ByIdRequest) returns (UsersAvailabilityResponse) {
-    option (google.api.http) = {get: "/user-availabilities/{id}"};
+    option (google.api.http) = {get: "/availabilities/{id}"};
   }
   rpc FindByUser(UserIdentification) returns (UsersAvailabilitiesResponse) {
-    option (google.api.http) = {get: "/user-availabilities"};
+    option (google.api.http) = {get: "/availabilities"};
   }
   rpc DeclareAvailability(DeclareAvailabilityRequest) returns (UsersAvailabilityResponse) {
-    option (google.api.http) = {post: "/user-availabilities"};
+    option (google.api.http) = {post: "/availabilities"};
   }
 }
 
