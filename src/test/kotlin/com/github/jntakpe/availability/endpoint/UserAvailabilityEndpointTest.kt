@@ -14,6 +14,7 @@ import com.github.jntakpe.availability.proto.UsersAvailabilityServiceGrpc.UsersA
 import com.github.jntakpe.commons.test.assertStatusException
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
+import io.micronaut.configuration.lettuce.cache.RedisCache
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.catchThrowable
@@ -21,13 +22,19 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.ArgumentsSource
+import javax.inject.Named
 
 @MicronautTest
-internal class UserAvailabilityEndpointTest(private val dao: UserAvailabilityDao, private val stub: UsersAvailabilityServiceBlockingStub) {
+internal class UserAvailabilityEndpointTest(
+    private val dao: UserAvailabilityDao,
+    private val stub: UsersAvailabilityServiceBlockingStub,
+    @Named("users-availability") private val rawCache: RedisCache,
+) {
 
     @BeforeEach
     fun setup() {
         dao.init()
+        rawCache.invalidateAll()
     }
 
     @ParameterizedTest

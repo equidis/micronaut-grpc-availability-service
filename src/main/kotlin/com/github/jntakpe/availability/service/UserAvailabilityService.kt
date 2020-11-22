@@ -3,6 +3,7 @@ package com.github.jntakpe.availability.service
 import com.github.jntakpe.availability.client.UserClient
 import com.github.jntakpe.availability.model.entity.UserAvailability
 import com.github.jntakpe.availability.repository.UserAvailabilityRepository
+import com.github.jntakpe.commons.cache.RedisReactiveCache
 import com.github.jntakpe.commons.context.CommonException
 import com.github.jntakpe.commons.context.logger
 import com.github.jntakpe.commons.mongo.insertError
@@ -11,25 +12,32 @@ import io.grpc.StatusRuntimeException
 import org.bson.types.ObjectId
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.toFlux
 import reactor.kotlin.core.publisher.toMono
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
-class UserAvailabilityService(private val repository: UserAvailabilityRepository, private val client: UserClient) {
+class UserAvailabilityService(
+    private val repository: UserAvailabilityRepository,
+    private val client: UserClient,
+    @Named("users-availability") private val usersAvailabilityCache: RedisReactiveCache,
+) {
 
     private val log = logger()
 
     fun findById(id: ObjectId): Mono<UserAvailability> {
-        return repository.findById(id)
+        return usersAvailabilityCache.orPutOnCacheMiss(id) { repository.findById(id) }
             .doOnSubscribe { log.debug("Searching user availability by id {}", id) }
             .doOnNext { log.debug("{} retrieved using it's id", it) }
             .switchIfEmpty(missingIdError(id).toMono())
     }
 
     fun findByUserId(userId: String): Flux<UserAvailability> {
-        return repository.findByUserId(userId)
+        return usersAvailabilityCache.orPutOnCacheMiss(userId) { repository.findByUserId(userId).collectList() }
             .doOnSubscribe { log.debug("Searching user availability by user id {}", userId) }
-            .doOnComplete { log.debug("Availabilities retrieved using user id {}", userId) }
+            .doOnNext { log.debug("{} availabilities retrieved using user id {}", it.size, userId) }
+            .flatMapMany { it.toFlux() }
     }
 
     fun findByUsername(username: String): Flux<UserAvailability> {
@@ -50,6 +58,10 @@ class UserAvailabilityService(private val repository: UserAvailabilityRepository
             .doOnSubscribe { log.debug("Creating {}", userAvailability) }
             .doOnNext { log.info("{} created", it) }
             .onErrorMap { it.insertError(userAvailability, log) }
+            .doOnNext {
+                usersAvailabilityCache.putAndForget(userAvailability.id, userAvailability)
+                usersAvailabilityCache.putAndForget(userAvailability.userId, userAvailability)
+            }
     }
 
     private fun verifyUserIdExists(id: String): Mono<Void> {
