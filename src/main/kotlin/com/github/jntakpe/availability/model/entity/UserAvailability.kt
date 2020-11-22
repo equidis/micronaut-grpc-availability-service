@@ -16,8 +16,8 @@ data class UserAvailability(
     val userId: String,
     @Serializable(with = LocalDateSerializer::class) val day: LocalDate,
     val arrangement: WorkArrangementType,
-    @SerialName(DB_ID) @Serializable(ObjectIdSerializer::class) override val id: ObjectId = ObjectId()
-) : Identifiable {
+    @SerialName(DB_ID) @Serializable(ObjectIdSerializer::class) override val id: ObjectId = ObjectId(),
+) : Identifiable, java.io.Serializable {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
