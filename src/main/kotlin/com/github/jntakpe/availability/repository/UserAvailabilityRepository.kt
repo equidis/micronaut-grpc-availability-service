@@ -22,6 +22,7 @@ class UserAvailabilityRepository(database: MongoDatabase) {
     private val collection = database.getCollection<UserAvailability>().toReactor()
 
     init {
+        collection.createIndex(ascending(UserId), IndexOptions()).subscribe()
         collection.createIndex(Indexes.compoundIndex(ascending(UserId, Day)), IndexOptions().unique(true)).subscribe()
     }
 
