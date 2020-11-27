@@ -44,7 +44,7 @@ class UserAvailabilityService(
         return client.findByUsername(username)
             .onErrorResume({ it.isNotFoundError() }) { Mono.empty() }
             .doOnSubscribe { log.debug("Searching user availability identifier using it's username {}", username) }
-            .doOnNext { log.debug("{} retrieved using it's username", it) }
+            .doOnNext { log.debug("User {} retrieved using it's username", it.username) }
             .flatMapMany { findByUserId(it.id) }
     }
 
