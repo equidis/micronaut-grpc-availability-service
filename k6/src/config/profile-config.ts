@@ -7,6 +7,7 @@ interface InitDataOptions {
     callInterval: number;
     init: number,
     findIterations: number,
+    rest: boolean
 }
 
 export function profileConfig(): ExtendedOptions {
@@ -27,8 +28,13 @@ export function profile(): Profile {
     return Profile[envProfile];
 }
 
+function apiTypeConfig(): { rest: boolean } {
+    return {rest: (__ENV.rest !== 'false' && !!__ENV.rest),}
+}
+
 function smokeConfiguration(): ExtendedOptions {
     return {
+        ...apiTypeConfig(),
         callInterval: 0,
         init: envNumberVar('init_iter') || 0,
         findIterations: envNumberVar('find_iter') || 1
@@ -38,6 +44,7 @@ function smokeConfiguration(): ExtendedOptions {
 function loadConfiguration(): ExtendedOptions {
     const networkLatency = envNumberVar('network_latency') || 0;
     return {
+        ...apiTypeConfig(),
         stages: [
             {duration: '30s', target: envNumberVar('plateau_target') || 200},
             {duration: __ENV.plateau_duration || '2m', target: envNumberVar('plateau_target') || 200},
@@ -55,6 +62,7 @@ function loadConfiguration(): ExtendedOptions {
 
 function stressConfiguration(): ExtendedOptions {
     return {
+        ...apiTypeConfig(),
         stages: [
             {duration: '30s', target: envNumberVar('plateau_target') || 20},
             {duration: __ENV.plateau_duration || '2m', target: envNumberVar('plateau_target') || 20},
@@ -69,6 +77,7 @@ function stressConfiguration(): ExtendedOptions {
 
 function soakConfiguration(): ExtendedOptions {
     return {
+        ...apiTypeConfig(),
         stages: [
             {duration: '30m', target: envNumberVar('plateau_target') || 200},
             {duration: __ENV.plateau_duration || '4h', target: envNumberVar('plateau_target') || 200},
