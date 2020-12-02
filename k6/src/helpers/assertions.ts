@@ -19,16 +19,16 @@ export function body(response) {
     return response.message || response.json();
 }
 
-export function isArray(response) {
-    return Array.isArray(body(response));
+export function isArray(response, arrayExtractor) {
+    return Array.isArray(arrayExtractor(response));
 }
 
-export function hasSize(response, expectedSize: number) {
-    return isArray(response) && (body(response) as any).length === expectedSize;
+export function hasSize(response, arrayExtractor, expectedSize: number) {
+    return isArray(response, arrayExtractor) && arrayExtractor(response).length === expectedSize;
 }
 
-export function hasAtLeastSize(response, expectedSize: number) {
-    return isArray(response) && (body(response) as any).length >= expectedSize;
+export function hasAtLeastSize(response, arrayExtractor, expectedSize: number) {
+    return isArray(response, arrayExtractor) && arrayExtractor(response).length >= expectedSize;
 }
 
 export function hasId(response): boolean {
@@ -38,8 +38,4 @@ export function hasId(response): boolean {
 
 export function sameId(response, expectedId: string): boolean {
     return hasId(response) && expectedId === bodyId(response);
-}
-
-function isGrpcOK(response) {
-    return response.status === grpc.StatusOK
 }
