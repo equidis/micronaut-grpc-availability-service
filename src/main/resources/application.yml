@@ -20,6 +20,3 @@ grpc:
     users:
       plaintext: true
       target: users:50051
-tracing:
-  zipkin:
-    enabled: true
