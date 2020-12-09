@@ -31,7 +31,7 @@ plugins {
     kotlin("plugin.allopen") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
     id("com.google.protobuf") version "0.8.13"
-    id("io.micronaut.application") version "1.1.0"
+    id("io.micronaut.application") version "1.2.0"
     id("com.google.cloud.tools.jib") version "2.6.0"
     id("com.github.johnrengelman.shadow") version "6.1.0"
 }
@@ -59,9 +59,10 @@ micronaut {
 }
 
 dependencies {
-    kapt(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    kapt(enforcedPlatform("io.micronaut:micronaut-bom:$micronautVersion"))
     kapt("io.micronaut:micronaut-inject-java")
     kapt("org.litote.kmongo:kmongo-annotation-processor:$kMongoVersion")
+    implementation(enforcedPlatform("io.micronaut:micronaut-bom:$micronautVersion"))
     implementation("com.github.jntakpe:commons-cache:$commonsVersion")
     implementation("com.github.jntakpe:commons-grpc:$commonsVersion")
     implementation("com.github.jntakpe:commons-management:$commonsVersion")
@@ -69,7 +70,7 @@ dependencies {
     implementation("com.github.jntakpe:commons-mongo:$commonsVersion")
     implementation("com.github.jntakpe:commons-tracing:$commonsVersion")
     runtimeOnly("ch.qos.logback:logback-classic")
-    kaptTest(platform("io.micronaut:micronaut-bom:$micronautVersion"))
+    kaptTest(enforcedPlatform("io.micronaut:micronaut-bom:$micronautVersion"))
     kaptTest("io.micronaut:micronaut-inject-java")
     testImplementation("com.github.jntakpe:commons-cache-test:$commonsVersion")
     testImplementation("com.github.jntakpe:commons-grpc-test:$commonsVersion")
