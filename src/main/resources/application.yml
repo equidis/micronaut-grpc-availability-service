@@ -20,3 +20,6 @@ grpc:
     users:
       plaintext: true
       target: users:50051
+endpoints:
+  all:
+    enabled: false
