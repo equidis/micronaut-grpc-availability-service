@@ -8,9 +8,12 @@ import io.micronaut.gradle.MicronautRuntime.NONE
 import io.micronaut.gradle.MicronautTestRuntime.JUNIT_5
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import org.jetbrains.kotlin.util.prefixIfNot
+import java.net.URL
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
+import org.gradle.kotlin.dsl.java as java1
 
 val commonsVersion: String by project
 val usersVersion: String by project
@@ -20,6 +23,7 @@ val kMongoVersion: String by project
 val basePackage = "com.github.jntakpe"
 val protoDescriptorPath = "${buildDir}/generated/proto.pb"
 val grpcServices = listOf("availability.UsersAvailabilityService")
+val grpcHealthProbeDir = "$buildDir/tmp/bin/"
 
 plugins {
     idea
@@ -82,7 +86,7 @@ application {
     mainClass.set("$basePackage.availability.ApplicationKt")
 }
 
-java {
+java1 {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
@@ -146,6 +150,14 @@ jib {
     to {
         image = "eu.gcr.io/equidis/micronaut-availability:${project.version}"
     }
+    extraDirectories {
+        paths {
+            path {
+                setFrom(grpcHealthProbeDir)
+                into = "/bin"
+            }
+        }
+    }
 }
 
 tasks {
@@ -193,6 +205,9 @@ tasks {
     assemble {
         dependsOn(deploymentZip)
     }
+    withType<com.google.cloud.tools.jib.gradle.JibTask> {
+        doFirst { downloadHealthProbeBinary() }
+    }
 }
 val protoJar = tasks.register<Jar>("protoJar") {
     dependsOn(tasks.jar)
@@ -224,4 +239,11 @@ fun RepositoryHandler.mavenGithub(repository: String) = maven {
         username = githubActor
         password = githubToken
     }
+}
+
+fun downloadHealthProbeBinary() {
+    val probeVersion = "v0.3.5"
+    val url = URL("https://github.com/grpc-ecosystem/grpc-health-probe/releases/download/${probeVersion}/grpc_health_probe-linux-amd64")
+    Files.createDirectories(Paths.get(grpcHealthProbeDir))
+    Files.copy(url.openStream(), Paths.get(grpcHealthProbeDir, "grpc_health_probe"), StandardCopyOption.REPLACE_EXISTING)
 }
