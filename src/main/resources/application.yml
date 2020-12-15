@@ -1,8 +1,6 @@
 micronaut:
   application:
     name: availability
-  server:
-    port: ${MANAGEMENT_PORT:8181}
 mongodb:
   uri: ${MONGO_PROTOCOL:mongodb}://${MONGO_CREDENTIALS:}${MONGO_HOST:`localhost:27017`}
   automatic-class-models: false
