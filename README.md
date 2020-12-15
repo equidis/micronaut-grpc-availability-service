@@ -5,10 +5,10 @@
 
 # Availability service
 
-Sample microservice that features [Micronaut](https://micronaut.io/) and [GRPC](https://grpc.io/) server. 
-The service is not relying on reflection thanks to [Micronaut](https://micronaut.io/), 
-[Protobuf](https://developers.google.com/protocol-buffers) and 
-[Kotlinx.serialization](https://kotlinlang.org/docs/reference/serialization.html) AOT capabilities. 
+Sample microservice that features [Micronaut](https://micronaut.io/) and [GRPC](https://grpc.io/) server. The service is not relying on
+reflection thanks to [Micronaut](https://micronaut.io/),
+[Protobuf](https://developers.google.com/protocol-buffers) and
+[Kotlinx.serialization](https://kotlinlang.org/docs/reference/serialization.html) AOT capabilities.
 
-From a functional standpoint this service calls 
-[micronaut-grpc-availability-service](https://github.com/equidis/micronaut-grpc-users-service) using GRPC.
+From a functional standpoint this delegates user management to
+[micronaut-grpc-users-service](https://github.com/equidis/micronaut-grpc-users-service) using GRPC to access it's API.
