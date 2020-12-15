@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.google.cloud.tools.jib.gradle.JibTask
 import com.google.protobuf.gradle.generateProtoTasks
 import com.google.protobuf.gradle.id
 import com.google.protobuf.gradle.plugins
@@ -13,7 +14,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
-import org.gradle.kotlin.dsl.java as java1
 
 val commonsVersion: String by project
 val usersVersion: String by project
@@ -87,7 +87,7 @@ application {
     mainClass.set("$basePackage.availability.ApplicationKt")
 }
 
-java1 {
+java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
@@ -207,7 +207,7 @@ tasks {
     assemble {
         dependsOn(deploymentZip)
     }
-    withType<com.google.cloud.tools.jib.gradle.JibTask> {
+    withType<JibTask> {
         doFirst { downloadHealthProbeBinary() }
     }
 }
