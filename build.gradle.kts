@@ -140,7 +140,7 @@ protobuf {
                 id(reactorId)
                 id(krotoId) {
                     outputSubDir = "java"
-                    option("ConfigPath=$krotoConfig")
+                    option("ConfigPath=${krotoConfig.name}")
                 }
             }
         }
