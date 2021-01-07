@@ -151,6 +151,9 @@ jib {
     to {
         image = "eu.gcr.io/equidis/micronaut-availability:${project.version}"
     }
+    from {
+        image = "gcr.io/distroless/java:11"
+    }
     extraDirectories {
         paths {
             path {
