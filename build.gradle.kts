@@ -21,8 +21,8 @@ val kotlinVersion: String by project
 val micronautVersion: String by project
 val kMongoVersion: String by project
 val basePackage = "com.github.jntakpe"
-val protoDescriptorPath = "${buildDir}/generated/proto.pb"
-val grpcServices = listOf("availability.UsersAvailabilityService")
+val protoDescriptorPath = "$buildDir/generated/proto.pb"
+val grpcServices = listOf("availabilities.UsersAvailabilityService")
 val grpcHealthProbeDir = "$buildDir/tmp/bin/"
 val probeExecName = "grpc_health_probe"
 
